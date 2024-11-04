@@ -1,5 +1,6 @@
 import express from "express";
 import connectDatabase from "./config/dbConnect.js";
+import book from "./models/Book.js";
 
 const connection = await connectDatabase();
 
@@ -8,35 +9,19 @@ connection.on("error", (erro) => {
 });
 
 connection.once("open", () => {
-    console.log("Connection with database made successfully");
-})
+  console.log("Connection with database made successfully");
+});
 
 const app = express();
 app.use(express.json());
-
-const books = [
-  {
-    id: 1,
-    title: "Lord of Rings",
-  },
-  {
-    id: 2,
-    title: "The Hobbit",
-  },
-];
-
-function searchBook(id) {
-  return books.findIndex((book) => {
-    return book.id === Number(id);
-  });
-}
 
 app.get("/", (req, res) => {
   res.status(200).send("Node.js Tutorial");
 });
 
-app.get("/books", (req, res) => {
-  res.status(200).json(books);
+app.get("/books", async (req, res) => {
+  const listBooks = await book.find({});
+  res.status(200).json(listBooks);
 });
 
 app.get("/books/:id", (req, res) => {
