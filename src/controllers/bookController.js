@@ -1,4 +1,5 @@
 import book from "../models/Book.js";
+import { author } from "../models/Author.js";
 
 class BookController {
   static async listBooks(req, res) {
@@ -16,18 +17,25 @@ class BookController {
       const bookFinded = await book.findById(id);
       res.status(200).json(bookFinded);
     } catch (error) {
-      if(req.params.id === null){
+      if (req.params.id === null) {
         res.status(500).json({ message: `${error.message} - Book Not Found` });
       } else {
-        res.status(500).json({ message: `${error.message} - Book Request Fail` });
+        res
+          .status(500)
+          .json({ message: `${error.message} - Book Request Fail` });
       }
     }
   }
 
   static async addBook(req, res) {
+    const newBook = req.body;
     try {
-      const newBook = await book.create(req.body);
-      res.status(201).json({ message: "Created with Success!", book: newBook });
+      const authorFinded = await author.findById(newBook.author);
+      const completeBook = { ...newBook, author: { ...authorFinded._doc } };
+      const bookCreated = await book.create(completeBook);
+      res
+        .status(201)
+        .json({ message: "Created with Success!", book: bookCreated });
     } catch (error) {
       res
         .status(500)
