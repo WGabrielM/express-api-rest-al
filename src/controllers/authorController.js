@@ -1,51 +1,70 @@
+import mongoose from "mongoose";
 import { author } from "../models/Author.js";
 
 class AuthorController {
-  static async listAuthors (req, res) {
+  static listAuthors = async (req, res) => {
     try {
-      const listAuthors = await author.find({});
-      res.status(200).json(listAuthors);
+      const authorResult = await author.find();
+
+      res.status(200).json(authorResult);
     } catch (erro) {
-      res.status(500).json({ message: `${erro.message} - Request Fail` });
+      res.status(500).json({ message: "Internal Server Error" });
     }
   };
 
-  static async listAuthorById (req, res) {
+  static listAuthorById = async (req, res) => {
     try {
       const id = req.params.id;
-      const authorFinded = await author.findById(id);
-      res.status(200).json(authorFinded);
+
+      const authorResult = await autores.findById(id);
+
+      if (authorResult !== null) {
+        res.status(200).send(authorResult);
+      } else {
+        res.status(404).send({message: "Id Author not found."});
+      }
     } catch (erro) {
-      res.status(500).json({ message: `${erro.message} - Request Author Fail` });
+      if (erro instanceof mongoose.Error.CastError) {
+        res.status(400).send({message: "One or more datas incorrect."});
+      } else {
+        res.status(500).send({message: "Internal Server Error."});
+      }
     }
   };
 
-  static async addAuthor (req, res) {
+  static addAuthor = async (req, res) => {
     try {
-      const newAuthor = await author.create(req.body);
-      res.status(201).json({ message: "Success Create", livro: newAuthor });
-    } catch (erro) {
-      res.status(500).json({ message: `${erro.message} - Fail Add Author` });
-    }
-  }
+      let author = new author(req.body);
 
-  static async updateAuthor (req, res) {
-    try {
-      const id = req.params.id;
-      await author.findByIdAndUpdate(id, req.body);
-      res.status(200).json({ message: "Author Updated" });
+      const authorResult = await author.save();
+
+      res.status(201).send(authorResult.toJSON());
     } catch (erro) {
-      res.status(500).json({ message: `${erro.message} - Fail Update Author` });
+      res.status(500).send({message: `${erro.message} - Fail Add Author.`});
     }
   };
 
-  static async deleteAuthor (req, res) {
+  static updateAuthor = async (req, res) => {
     try {
       const id = req.params.id;
+  
+      await author.findByIdAndUpdate(id, {$set: req.body});
+
+      res.status(200).send({message: "Author successfully updated"});
+    } catch (erro) {
+      res.status(500).send({message: erro.message});
+    }
+  };
+
+  static deleteAuthor = async (req, res) => {
+    try {
+      const id = req.params.id;
+
       await author.findByIdAndDelete(id);
-      res.status(200).json({ message: "Success Delete Author" });
+
+      res.status(200).send({message: "Author Deleted Successfully"});
     } catch (erro) {
-      res.status(500).json({ message: `${erro.message} - Fail Delete Author` });
+      res.status(500).send({message: erro.message});
     }
   };
 };
