@@ -12,7 +12,7 @@ class AuthorController {
     }
   };
 
-  static listAuthorById = async (req, res) => {
+  static listAuthorById = async (req, res, next) => {
     try {
       const id = req.params.id;
 
@@ -23,48 +23,44 @@ class AuthorController {
       } else {
         res.status(404).send({message: "Id Author not found."});
       }
-    } catch (erro) {
-      if (erro instanceof mongoose.Error.CastError) {
-        res.status(400).send({message: "One or more datas incorrect."});
-      } else {
-        res.status(500).send({message: "Internal Server Error."});
-      }
+    } catch (error) {
+     next(error)
     }
   };
 
-  static addAuthor = async (req, res) => {
+  static addAuthor = async (req, res, next) => {
     try {
       let author = new author(req.body);
 
       const authorResult = await author.save();
 
       res.status(201).send(authorResult.toJSON());
-    } catch (erro) {
-      res.status(500).send({message: `${erro.message} - Fail Add Author.`});
+    } catch (error) {
+      next(error)
     }
   };
 
-  static updateAuthor = async (req, res) => {
+  static updateAuthor = async (req, res, next) => {
     try {
       const id = req.params.id;
   
       await author.findByIdAndUpdate(id, {$set: req.body});
 
       res.status(200).send({message: "Author successfully updated"});
-    } catch (erro) {
-      res.status(500).send({message: erro.message});
+    } catch (error) {
+     next(error)
     }
   };
 
-  static deleteAuthor = async (req, res) => {
+  static deleteAuthor = async (req, res, next) => {
     try {
       const id = req.params.id;
 
       await author.findByIdAndDelete(id);
 
       res.status(200).send({message: "Author Deleted Successfully"});
-    } catch (erro) {
-      res.status(500).send({message: erro.message});
+    } catch (error) {
+     next(error)
     }
   };
 };

@@ -11,7 +11,7 @@ class BookController {
     }
   }
 
-  static async listBookById(req, res) {
+  static async listBookById(req, res, next) {
     try {
       const id = req.params.id;
       const bookFinded = await book.findById(id);
@@ -20,14 +20,12 @@ class BookController {
       if (req.params.id === null) {
         res.status(500).json({ message: `${error.message} - Book Not Found` });
       } else {
-        res
-          .status(500)
-          .json({ message: `${error.message} - Book Request Fail` });
+        next(error);
       }
     }
   }
 
-  static async addBook(req, res) {
+  static async addBook(req, res, next) {
     const newBook = req.body;
     try {
       const authorFinded = await author.findById(newBook.author);
@@ -37,40 +35,38 @@ class BookController {
         .status(201)
         .json({ message: "Created with Success!", book: bookCreated });
     } catch (error) {
-      res
-        .status(500)
-        .json({ message: `${error.message} - Faill create new book` });
+      next(error);
     }
   }
 
-  static async updateBook(req, res) {
+  static async updateBook(req, res, next) {
     try {
       const id = req.params.id;
       await book.findByIdAndUpdate(id, req.body);
       res.status(200).json({ message: "Book Updated" });
     } catch (error) {
-      res.status(500).json({ message: `${error.message} - Faill update book` });
+      next(error);
     }
   }
 
-  static async deleteBook(req, res) {
+  static async deleteBook(req, res, next) {
     try {
       const id = req.params.id;
       await book.findByIdAndDelete(id);
       res.status(200).json({ message: "Book Deleted" });
     } catch (error) {
-      res.status(500).json({ message: `${error.message} - Faill delete book` });
+      next(error);
     }
   }
-  
-  static async listBookByPublisher(req, res) {
+
+  static async listBookByPublisher(req, res, next) {
     const publisher = req.query.publisher;
-    
+
     try {
-      const booksByPublisher = await book.find({ publisher: publisher})
-      res.status(200).json(booksByPublisher)
+      const booksByPublisher = await book.find({ publisher: publisher });
+      res.status(200).json(booksByPublisher);
     } catch (error) {
-      res.status(500).json({ message: `${error.message} - Fail Find Book by Publisher` });
+      next(error);
     }
   }
 }
